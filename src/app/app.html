@@ -1,0 +1,41 @@
+<mat-toolbar class="app-toolbar">
+  <span class="app-title">LMS System</span>
+
+  <span class="app-spacer"></span>
+
+  <ng-container *ngIf="isLoggedIn">
+    <span class="app-hello">Hello {{ userName }}</span>
+
+    <a routerLink="/student" class="app-nav-link">
+      Courses
+    </a>
+
+    <a routerLink="/student/my-courses" class="app-nav-link">
+      My Courses
+    </a>
+
+    <a *ngIf="userRole === 'Teacher'" routerLink="/teacher" class="app-nav-link">
+      Teacher
+    </a>
+
+    <a *ngIf="userRole === 'Admin'" routerLink="/admin" class="app-nav-link">
+      Admin
+    </a>
+
+    <button class="app-logout-btn" (click)="logout()">
+      Logout
+    </button>
+  </ng-container>
+</mat-toolbar>
+
+<div *ngIf="!isLoggedIn" class="main-container">
+  <div class="section-card">
+    <app-login (loginSuccess)="onLoginSuccess()"></app-login>
+  </div>
+</div>
+
+<div *ngIf="isLoggedIn" class="main-container">
+  <div class="section-card">
+    <router-outlet></router-outlet>
+  </div>
+</div>

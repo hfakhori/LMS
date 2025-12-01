@@ -1,0 +1,32 @@
+<div style="
+  max-width: 350px;
+  margin: 30px auto;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+">
+
+  <h2 style="text-align: center;">Login</h2>
+
+  <label>Login as:</label>
+  <select [(ngModel)]="userType" style="width: 100%; padding: 6px; margin-bottom: 10px;">
+    <option value="student">Student</option>
+    <option value="teacher">Teacher</option>
+    <option value="admin">Admin</option>
+  </select>
+
+  <label>Email:</label>
+  <input [(ngModel)]="email" type="email" style="width: 100%; padding: 6px; margin-bottom: 10px;">
+
+  <label>Password:</label>
+  <input [(ngModel)]="password" type="password" style="width: 100%; padding: 6px; margin-bottom: 10px;">
+
+  <button (click)="onSubmit()" style="width: 100%; padding: 8px;">
+    Login
+  </button>
+
+  <p *ngIf="message" style="margin-top: 15px; text-align: center;">
+    {{ message }}
+  </p>
+
+</div>

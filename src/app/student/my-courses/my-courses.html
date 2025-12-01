@@ -1,0 +1,29 @@
+<h2 style="margin: 20px 0; text-align: center;">
+  My Courses
+</h2>
+
+<p *ngIf="errorMessage" style="text-align: center; color: red;">
+  {{ errorMessage }}
+</p>
+
+<div *ngIf="!errorMessage">
+
+  <ul>
+    <li *ngFor="let c of pagedCourses" style="margin-bottom: 12px;">
+      <strong>{{ c.title }}</strong> — {{ c.description }}
+    </li>
+  </ul>
+
+  <p *ngIf="pagedCourses.length === 0" style="text-align: center; color: gray;">
+    No enrolled courses found.
+  </p>
+
+  <mat-paginator
+      [length]="totalItems"
+      [pageSize]="pageSize"
+      [pageSizeOptions]="[5, 10, 20]"
+      (page)="onPageChange($event)"
+      showFirstLastButtons>
+  </mat-paginator>
+
+</div>

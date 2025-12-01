@@ -1,0 +1,156 @@
+
+<h2 style="margin: 20px 0; text-align: center;">
+  Admin Dashboard
+</h2>
+
+<div style="margin: 20px;">
+
+  <h3>Students Management</h3>
+
+  <p *ngIf="studentErrorMessage" style="color: red;">
+    {{ studentErrorMessage }}
+  </p>
+
+  <button (click)="loadStudents()"
+          style="margin-bottom: 10px; padding: 4px 10px;">
+    Refresh Students
+  </button>
+
+  <table border="1" cellspacing="0" cellpadding="6"
+         style="width: 100%; border-collapse: collapse; margin-bottom: 10px;">
+    <thead style="background-color: #f0f0f0;">
+      <tr>
+        <th>ID</th>
+        <th>Full Name</th>
+        <th>Email</th>
+        <th style="width: 120px;">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let s of students">
+        <td>{{ s.id }}</td>
+        <td>{{ s.fullName }}</td>
+        <td>{{ s.email }}</td>
+        <td>
+          <button (click)="deleteStudent(s.id)">Delete</button>
+        </td>
+      </tr>
+
+      <tr *ngIf="students.length === 0 && !studentErrorMessage">
+        <td colspan="4" style="text-align: center; color: gray;">
+          No students found.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <mat-paginator
+    [length]="studentsTotalItems"
+    [pageSize]="studentsPageSize"
+    [pageSizeOptions]="[5, 10, 20]"
+    (page)="onStudentsPageChange($event)"
+    showFirstLastButtons>
+  </mat-paginator>
+
+  <hr style="margin: 30px 0;">
+
+  <h3>Teachers Management</h3>
+
+  <p *ngIf="teacherErrorMessage" style="color: red;">
+    {{ teacherErrorMessage }}
+  </p>
+
+  <button (click)="loadTeachers()"
+          style="margin-bottom: 10px; padding: 4px 10px;">
+    Refresh Teachers
+  </button>
+
+  <table border="1" cellspacing="0" cellpadding="6"
+         style="width: 100%; border-collapse: collapse; margin-bottom: 10px;">
+    <thead style="background-color: #f0f0f0;">
+      <tr>
+        <th>ID</th>
+        <th>Full Name</th>
+        <th>Email</th>
+        <th style="width: 120px;">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let t of teachers">
+        <td>{{ t.id }}</td>
+        <td>{{ t.fullName }}</td>
+        <td>{{ t.email }}</td>
+        <td>
+          <button (click)="deleteTeacher(t.id)">Delete</button>
+        </td>
+      </tr>
+
+      <tr *ngIf="teachers.length === 0 && !teacherErrorMessage">
+        <td colspan="4" style="text-align: center; color: gray;">
+          No teachers found.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <mat-paginator
+    [length]="teachersTotalItems"
+    [pageSize]="teachersPageSize"
+    [pageSizeOptions]="[5, 10, 20]"
+    (page)="onTeachersPageChange($event)"
+    showFirstLastButtons>
+  </mat-paginator>
+
+  <hr style="margin: 30px 0;">
+
+  <h3>Courses Management</h3>
+
+  <p *ngIf="courseErrorMessage" style="color: red;">
+    {{ courseErrorMessage }}
+  </p>
+
+  <button (click)="loadCourses()"
+          style="margin-bottom: 10px; padding: 4px 10px;">
+    Refresh Courses
+  </button>
+
+  <table border="1" cellspacing="0" cellpadding="6"
+         style="width: 100%; border-collapse: collapse; margin-bottom: 10px;">
+    <thead style="background-color: #f0f0f0;">
+      <tr>
+        <th>ID</th>
+        <th>Title</th>
+        <th>Description</th>
+        <th>Teacher ID</th>
+        <th style="width: 120px;">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let c of courses">
+        <td>{{ c.id }}</td>
+        <td>{{ c.title }}</td>
+        <td>{{ c.description }}</td>
+        <td>{{ c.teacherId }}</td>
+        <td>
+          <button (click)="deleteCourse(c.id)">Delete</button>
+        </td>
+      </tr>
+
+      <tr *ngIf="courses.length === 0 && !courseErrorMessage">
+        <td colspan="5" style="text-align: center; color: gray;">
+          No courses found.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <mat-paginator
+    [length]="coursesTotalItems"
+    [pageSize]="coursesPageSize"
+    [pageSizeOptions]="[5, 10, 20]"
+    (page)="onCoursesPageChange($event)"
+    showFirstLastButtons>
+  </mat-paginator>
+
+</div>
+

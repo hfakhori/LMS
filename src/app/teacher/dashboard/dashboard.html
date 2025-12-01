@@ -1,0 +1,48 @@
+<h2 class="page-title">Teacher Dashboard</h2>
+
+<h3>Your Courses:</h3>
+
+<p *ngIf="errorMessage" style="color:red;">{{ errorMessage }}</p>
+
+<ul>
+  <li *ngFor="let c of courses" style="margin-bottom: 10px;">
+    <strong>{{ c.title }}</strong> — {{ c.description }}
+
+    <button (click)="viewStudents(c.id)">Students</button>
+    <button (click)="deleteCourse(c.id)">Delete</button>
+  </li>
+</ul>
+
+<mat-paginator
+  [length]="totalItems"
+  [pageSize]="pageSize"
+  [pageSizeOptions]="[5, 10, 20]"
+  (page)="onPageChange($event)"
+  showFirstLastButtons>
+</mat-paginator>
+
+<div *ngIf="showStudentsModal" class="modal-backdrop">
+  <div class="modal-content">
+    <h3>Students in Course</h3>
+
+    <!-- <pre>{{ selectedCourseStudents | json }}</pre> -->
+
+    <div *ngIf="hasStudents; else noStudentsTpl">
+      <ul>
+        <li *ngFor="let s of selectedCourseStudents">
+          (ID: {{ s.id }}) -{{ s.fullName }}  - {{ s.email }}
+        </li>
+      </ul>
+    </div>
+
+    <ng-template #noStudentsTpl>
+      <p>No students enrolled.</p>
+    </ng-template>
+    <button (click)="loadCourses()"
+          style="margin-bottom: 10px; padding: 4px 10px;">
+    Refresh Courses
+  </button>
+
+    <button (click)="closeStudentsModal()">Close</button>
+  </div>
+</div>

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environments';
@@ -16,6 +16,7 @@ export class TeacherDashboardComponent implements OnInit {
   private baseUrl = environment.apiUrl;
 
   teacherId: number = 0;
+  couter: number = 0;
 
   courses: any[] = [];
   errorMessage: string = '';
@@ -28,7 +29,7 @@ export class TeacherDashboardComponent implements OnInit {
   selectedCourseId: number | null = null;
   selectedCourseStudents: any[] = [];
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient,private cdr:ChangeDetectorRef) { }
 
   ngOnInit(): void {
     console.log('TeacherDashboardComponent init');
@@ -63,6 +64,7 @@ export class TeacherDashboardComponent implements OnInit {
         this.totalItems = res.totalItems;
         this.pageNumber = res.pageNumber;
         this.pageSize = res.pageSize;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error loading courses', err);
@@ -83,20 +85,25 @@ export class TeacherDashboardComponent implements OnInit {
 
     this.selectedCourseId = courseId;
     this.selectedCourseStudents = [];
-    this.showStudentsModal = true;
+
     this.http.get<any[]>(`${this.baseUrl}/Enrollment/Course/${courseId}`)
       .subscribe({
         next: (students) => {
+          this.showStudentsModal = true;
+
           console.log('API students response =', students);
           this.selectedCourseStudents = students;
+          this.cdr.detectChanges();
         },
+        
+        
         error: (err) => {
           console.error('Error loading students for course', err);
           this.selectedCourseStudents = [];
         }
       });
   }
- 
+
   closeStudentsModal() {
     console.log('Closing modal');
     this.showStudentsModal = false;
@@ -117,5 +124,9 @@ export class TeacherDashboardComponent implements OnInit {
           alert('Failed to delete course ');
         }
       });
+  }
+  count() {
+    this.couter += 1;
+    this.showStudentsModal = true;
   }
 }

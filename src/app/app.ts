@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component,OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { RouterOutlet, RouterLink } from '@angular/router';
@@ -18,7 +18,7 @@ import { Auth } from './services/auth';
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
-export class App {
+export class App  implements OnInit {
 
   isLoggedIn: boolean = false;
   userName: string | null = null;

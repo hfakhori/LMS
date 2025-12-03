@@ -26,23 +26,30 @@
     <h3>Students in Course</h3>
 
     <!-- <pre>{{ selectedCourseStudents | json }}</pre> -->
-
-    <div *ngIf="hasStudents; else noStudentsTpl">
+@if(hasStudents)
+{
+    <div  >
       <ul>
         <li *ngFor="let s of selectedCourseStudents">
           (ID: {{ s.id }}) -{{ s.fullName }}  - {{ s.email }}
         </li>
       </ul>
     </div>
-
-    <ng-template #noStudentsTpl>
+  }
+  @else {
+    <p>No students enrolled.</p>
+  }
+    <!-- <ng-template #noStudentsTpl>
       <p>No students enrolled.</p>
-    </ng-template>
-    <button (click)="loadCourses()"
+    </ng-template> -->
+    <!-- <button (click)="loadCourses()"
           style="margin-bottom: 10px; padding: 4px 10px;">
     Refresh Courses
-  </button>
+  </button> -->
 
     <button (click)="closeStudentsModal()">Close</button>
   </div>
 </div>
+<div>Counter: {{ couter }}</div>
+    <button (click)="count()">count</button>
+

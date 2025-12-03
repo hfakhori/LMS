@@ -125,8 +125,5 @@ export class TeacherDashboardComponent implements OnInit {
         }
       });
   }
-  count() {
-    this.couter += 1;
-    this.showStudentsModal = true;
-  }
+
 }

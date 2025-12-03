@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit,ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environments';
@@ -33,7 +33,7 @@ export class AdminDashboardComponent implements OnInit {
   coursesPageSize: number = 5;
   coursesTotalItems: number = 0;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient,private cdr:ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.loadStudents();
@@ -56,6 +56,7 @@ export class AdminDashboardComponent implements OnInit {
         this.studentsTotalItems = res.totalItems || 0;
         this.studentsPageNumber = res.pageNumber || this.studentsPageNumber;
         this.studentsPageSize = res.pageSize || this.studentsPageSize;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error loading students', err);
@@ -104,6 +105,7 @@ export class AdminDashboardComponent implements OnInit {
         this.teachersTotalItems = res.totalItems || 0;
         this.teachersPageNumber = res.pageNumber || this.teachersPageNumber;
         this.teachersPageSize = res.pageSize || this.teachersPageSize;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error loading teachers:', err);
@@ -152,6 +154,7 @@ export class AdminDashboardComponent implements OnInit {
         this.coursesTotalItems = res.totalItems || 0;
         this.coursesPageNumber = res.pageNumber || this.coursesPageNumber;
         this.coursesPageSize = res.pageSize || this.coursesPageSize;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error loading courses:', err);

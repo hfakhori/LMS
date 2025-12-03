@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter } from '@angular/core';
+import { Component, Output, EventEmitter,ChangeDetectorRef} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Auth } from '../../services/auth';
@@ -19,7 +19,7 @@ export class LoginComponent {
   password: string = '';
   message: string = '';
 
-  constructor(private auth: Auth) {}
+  constructor(private auth: Auth, private cdr:ChangeDetectorRef) {}
 
   onSubmit() {
     this.message = '';
@@ -45,6 +45,7 @@ export class LoginComponent {
         this.message = 'Login successful';
 
         this.loginSuccess.emit();
+        this.cdr.detectChanges();
       },
       error: () => {
         this.message = 'Login failed check your email/password.';

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit,ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environments';
@@ -27,7 +27,8 @@ export class MyCoursesComponent implements OnInit {
 
   constructor(
     private http: HttpClient,
-    private auth: Auth
+    private auth: Auth,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -52,6 +53,7 @@ export class MyCoursesComponent implements OnInit {
             this.myCourses = [];
             this.pagedCourses = [];
             this.totalItems = 0;
+            this.cdr.detectChanges();
             return;
           }
 
@@ -64,6 +66,7 @@ export class MyCoursesComponent implements OnInit {
                 this.totalItems = this.myCourses.length;
 
                 this.applyPagination();
+                this.cdr.detectChanges();
               },
               error: () => {
                 this.errorMessage = 'Error loading courses data.';

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environments';
@@ -26,7 +26,8 @@ export class DashboardComponent implements OnInit {
 
   constructor(
     private http: HttpClient,
-    private auth: Auth
+    private auth: Auth,
+    private cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {
@@ -40,6 +41,7 @@ export class DashboardComponent implements OnInit {
           this.courses = res.items || [];
           this.totalItems = res.totalItems;
           this.totalPages = res.totalPages;
+          this.cdr.detectChanges();
         },
         error: () => {
           this.errorMessage = "Error loading courses.";

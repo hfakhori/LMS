@@ -8,18 +8,25 @@
 
   <h3 style="margin-left: 20px;">Available Courses:</h3>
 
-  <ul>
+  <p *ngIf="loading" style="margin-left: 20px; color: gray;">
+    Loading courses...
+  </p>
+
+  <ul *ngIf="!loading">
     <li *ngFor="let c of courses" style="margin-bottom: 10px;">
       <strong>{{ c.title }}</strong> — {{ c.description }}
 
-      <button (click)="enroll(c.id)"
-              style="margin-left: 10px; padding: 4px 10px;">
-        Enroll
+      <button
+        (click)="enroll(c.id)"
+        [disabled]="isCourseEnrolled(c.id)"
+        style="margin-left: 10px; padding: 4px 10px;"
+      >
+        {{ isCourseEnrolled(c.id) ? 'Enrolled' : 'Enroll' }}
       </button>
     </li>
   </ul>
 
-  <p *ngIf="courses.length === 0" style="margin-left: 20px;">
+  <p *ngIf="!loading && courses.length === 0" style="margin-left: 20px;">
     No courses available.
   </p>
 

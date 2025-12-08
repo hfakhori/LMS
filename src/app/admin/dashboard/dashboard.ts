@@ -1,13 +1,41 @@
-import { Component, OnInit,ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
+import { FormsModule } from '@angular/forms';
 import { environment } from '../../environments/environments';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+
+interface Student {
+  id: number;
+  fullName: string;
+  email: string;
+}
+
+interface Teacher {
+  id: number;
+  fullName: string;
+  email: string;
+}
+
+interface Course {
+  id: number;
+  title: string;
+  description: string;
+  teacherId: number;
+}
+
+interface PaginatedResponse<T> {
+  items: T[];
+  totalItems: number;
+  pageNumber: number;
+  pageSize: number;
+  totalPages?: number;
+}
 
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, MatPaginatorModule],
+  imports: [CommonModule, FormsModule, MatPaginatorModule],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css'
 })
@@ -15,25 +43,56 @@ export class AdminDashboardComponent implements OnInit {
 
   private baseUrl = environment.apiUrl;
 
-  students: any[] = [];
-  studentErrorMessage: string = '';
-  studentsPageNumber: number = 1;
-  studentsPageSize: number = 5;
-  studentsTotalItems: number = 0;
+  // ---------- Students ----------
+  students: Student[] = [];
+  studentErrorMessage = '';
+  studentsPageNumber = 1;
+  studentsPageSize = 5;
+  studentsTotalItems = 0;
 
-  teachers: any[] = [];
-  teacherErrorMessage: string = '';
-  teachersPageNumber: number = 1;
-  teachersPageSize: number = 5;
-  teachersTotalItems: number = 0;
+  isStudentFormVisible = false;
+  isEditingStudent = false;
+  studentFormError = '';
+  studentForm: { id: number | null; fullName: string; email: string } = {
+    id: null,
+    fullName: '',
+    email: ''
+  };
 
-  courses: any[] = [];
-  courseErrorMessage: string = '';
-  coursesPageNumber: number = 1;
-  coursesPageSize: number = 5;
-  coursesTotalItems: number = 0;
+  // ---------- Teachers ----------
+  teachers: Teacher[] = [];
+  teacherErrorMessage = '';
+  teachersPageNumber = 1;
+  teachersPageSize = 5;
+  teachersTotalItems = 0;
 
-  constructor(private http: HttpClient,private cdr:ChangeDetectorRef) {}
+  isTeacherFormVisible = false;
+  isEditingTeacher = false;
+  teacherFormError = '';
+  teacherForm: { id: number | null; fullName: string; email: string } = {
+    id: null,
+    fullName: '',
+    email: ''
+  };
+
+  // ---------- Courses ----------
+  courses: Course[] = [];
+  courseErrorMessage = '';
+  coursesPageNumber = 1;
+  coursesPageSize = 5;
+  coursesTotalItems = 0;
+
+  isCourseFormVisible = false;
+  isEditingCourse = false;
+  courseFormError = '';
+  courseForm: { id: number | null; title: string; description: string; teacherId: number | null } = {
+    id: null,
+    title: '',
+    description: '',
+    teacherId: null
+  };
+
+  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.loadStudents();
@@ -41,15 +100,16 @@ export class AdminDashboardComponent implements OnInit {
     this.loadCourses();
   }
 
+  // ============= Students =============
 
-  loadStudents() {
+  loadStudents(): void {
     this.studentErrorMessage = '';
 
-    this.http.get<any>(`${this.baseUrl}/Student/paged`, {
+    this.http.get<PaginatedResponse<Student>>(`${this.baseUrl}/Student/paged`, {
       params: {
         pageNumber: this.studentsPageNumber,
         pageSize: this.studentsPageSize
-      }
+      } as any
     }).subscribe({
       next: (res) => {
         this.students = res.items || [];
@@ -67,13 +127,77 @@ export class AdminDashboardComponent implements OnInit {
     });
   }
 
-  onStudentsPageChange(event: PageEvent) {
+  onStudentsPageChange(event: PageEvent): void {
     this.studentsPageNumber = event.pageIndex + 1;
     this.studentsPageSize = event.pageSize;
     this.loadStudents();
   }
 
-  deleteStudent(id: number) {
+  openCreateStudent(): void {
+    this.isEditingStudent = false;
+    this.studentFormError = '';
+    this.studentForm = { id: null, fullName: '', email: '' };
+    this.isStudentFormVisible = true;
+  }
+
+  openEditStudent(student: Student): void {
+    this.isEditingStudent = true;
+    this.studentFormError = '';
+    this.studentForm = {
+      id: student.id,
+      fullName: student.fullName,
+      email: student.email
+    };
+    this.isStudentFormVisible = true;
+  }
+
+  cancelStudentForm(): void {
+    this.isStudentFormVisible = false;
+    this.studentFormError = '';
+  }
+
+  submitStudentForm(): void {
+    if (!this.studentForm.fullName.trim() || !this.studentForm.email.trim()) {
+      this.studentFormError = 'Full name and email are required.';
+      return;
+    }
+
+    const payload = {
+      fullName: this.studentForm.fullName.trim(),
+      email: this.studentForm.email.trim()
+    };
+
+    if (this.isEditingStudent && this.studentForm.id != null) {
+      this.http.put(`${this.baseUrl}/Student/${this.studentForm.id}`, payload)
+        .subscribe({
+          next: () => {
+            this.isStudentFormVisible = false;
+            this.loadStudents();
+            alert('Student updated successfully ✔');
+          },
+          error: (err) => {
+            console.error('Error updating student:', err);
+            this.studentFormError = 'Failed to update student.';
+          }
+        });
+    } else {
+      this.http.post(`${this.baseUrl}/Student`, payload)
+        .subscribe({
+          next: () => {
+            this.isStudentFormVisible = false;
+            this.studentsPageNumber = 1;
+            this.loadStudents();
+            alert('Student created successfully ✔');
+          },
+          error: (err) => {
+            console.error('Error creating student:', err);
+            this.studentFormError = 'Failed to create student.';
+          }
+        });
+    }
+  }
+
+  deleteStudent(id: number): void {
     const confirmed = confirm('Are you sure you want to delete this student?');
     if (!confirmed) return;
 
@@ -85,20 +209,21 @@ export class AdminDashboardComponent implements OnInit {
         },
         error: (err) => {
           console.error('Error deleting student:', err);
-          alert('Failed to delete student ');
+          alert('Failed to delete student');
         }
       });
   }
 
+  // ============= Teachers =============
 
-  loadTeachers() {
+  loadTeachers(): void {
     this.teacherErrorMessage = '';
 
-    this.http.get<any>(`${this.baseUrl}/Teacher/paged`, {
+    this.http.get<PaginatedResponse<Teacher>>(`${this.baseUrl}/Teacher/paged`, {
       params: {
         pageNumber: this.teachersPageNumber,
         pageSize: this.teachersPageSize
-      }
+      } as any
     }).subscribe({
       next: (res) => {
         this.teachers = res.items || [];
@@ -116,13 +241,77 @@ export class AdminDashboardComponent implements OnInit {
     });
   }
 
-  onTeachersPageChange(event: PageEvent) {
+  onTeachersPageChange(event: PageEvent): void {
     this.teachersPageNumber = event.pageIndex + 1;
     this.teachersPageSize = event.pageSize;
     this.loadTeachers();
   }
 
-  deleteTeacher(id: number) {
+  openCreateTeacher(): void {
+    this.isEditingTeacher = false;
+    this.teacherFormError = '';
+    this.teacherForm = { id: null, fullName: '', email: '' };
+    this.isTeacherFormVisible = true;
+  }
+
+  openEditTeacher(teacher: Teacher): void {
+    this.isEditingTeacher = true;
+    this.teacherFormError = '';
+    this.teacherForm = {
+      id: teacher.id,
+      fullName: teacher.fullName,
+      email: teacher.email
+    };
+    this.isTeacherFormVisible = true;
+  }
+
+  cancelTeacherForm(): void {
+    this.isTeacherFormVisible = false;
+    this.teacherFormError = '';
+  }
+
+  submitTeacherForm(): void {
+    if (!this.teacherForm.fullName.trim() || !this.teacherForm.email.trim()) {
+      this.teacherFormError = 'Full name and email are required.';
+      return;
+    }
+
+    const payload = {
+      fullName: this.teacherForm.fullName.trim(),
+      email: this.teacherForm.email.trim()
+    };
+
+    if (this.isEditingTeacher && this.teacherForm.id != null) {
+      this.http.put(`${this.baseUrl}/Teacher/${this.teacherForm.id}`, payload)
+        .subscribe({
+          next: () => {
+            this.isTeacherFormVisible = false;
+            this.loadTeachers();
+            alert('Teacher updated successfully ✔');
+          },
+          error: (err) => {
+            console.error('Error updating teacher:', err);
+            this.teacherFormError = 'Failed to update teacher.';
+          }
+        });
+    } else {
+      this.http.post(`${this.baseUrl}/Teacher`, payload)
+        .subscribe({
+          next: () => {
+            this.isTeacherFormVisible = false;
+            this.teachersPageNumber = 1;
+            this.loadTeachers();
+            alert('Teacher created successfully ✔');
+          },
+          error: (err) => {
+            console.error('Error creating teacher:', err);
+            this.teacherFormError = 'Failed to create teacher.';
+          }
+        });
+    }
+  }
+
+  deleteTeacher(id: number): void {
     const confirmed = confirm('Are you sure you want to delete this teacher?');
     if (!confirmed) return;
 
@@ -130,24 +319,25 @@ export class AdminDashboardComponent implements OnInit {
       .subscribe({
         next: () => {
           this.loadTeachers();
-          alert('Teacher deleted successfully ');
+          alert('Teacher deleted successfully');
         },
         error: (err) => {
           console.error('Error deleting teacher:', err);
-          alert('Failed to delete teacher ');
+          alert('Failed to delete teacher');
         }
       });
   }
 
+  // ============= Courses =============
 
-  loadCourses() {
+  loadCourses(): void {
     this.courseErrorMessage = '';
 
-    this.http.get<any>(`${this.baseUrl}/Course`, {
+    this.http.get<PaginatedResponse<Course>>(`${this.baseUrl}/Course`, {
       params: {
         pageNumber: this.coursesPageNumber,
         pageSize: this.coursesPageSize
-      }
+      } as any
     }).subscribe({
       next: (res) => {
         this.courses = res.items || [];
@@ -165,13 +355,79 @@ export class AdminDashboardComponent implements OnInit {
     });
   }
 
-  onCoursesPageChange(event: PageEvent) {
+  onCoursesPageChange(event: PageEvent): void {
     this.coursesPageNumber = event.pageIndex + 1;
     this.coursesPageSize = event.pageSize;
     this.loadCourses();
   }
 
-  deleteCourse(id: number) {
+  openCreateCourse(): void {
+    this.isEditingCourse = false;
+    this.courseFormError = '';
+    this.courseForm = { id: null, title: '', description: '', teacherId: null };
+    this.isCourseFormVisible = true;
+  }
+
+  openEditCourse(course: Course): void {
+    this.isEditingCourse = true;
+    this.courseFormError = '';
+    this.courseForm = {
+      id: course.id,
+      title: course.title,
+      description: course.description,
+      teacherId: course.teacherId
+    };
+    this.isCourseFormVisible = true;
+  }
+
+  cancelCourseForm(): void {
+    this.isCourseFormVisible = false;
+    this.courseFormError = '';
+  }
+
+  submitCourseForm(): void {
+    if (!this.courseForm.title.trim() || this.courseForm.teacherId == null) {
+      this.courseFormError = 'Title and Teacher are required.';
+      return;
+    }
+
+    const payload = {
+      title: this.courseForm.title.trim(),
+      description: this.courseForm.description?.trim() || '',
+      teacherId: this.courseForm.teacherId
+    };
+
+    if (this.isEditingCourse && this.courseForm.id != null) {
+      this.http.put(`${this.baseUrl}/Course/${this.courseForm.id}`, payload)
+        .subscribe({
+          next: () => {
+            this.isCourseFormVisible = false;
+            this.loadCourses();
+            alert('Course updated successfully ✔');
+          },
+          error: (err) => {
+            console.error('Error updating course:', err);
+            this.courseFormError = 'Failed to update course.';
+          }
+        });
+    } else {
+      this.http.post(`${this.baseUrl}/Course`, payload)
+        .subscribe({
+          next: () => {
+            this.isCourseFormVisible = false;
+            this.coursesPageNumber = 1;
+            this.loadCourses();
+            alert('Course created successfully ✔');
+          },
+          error: (err) => {
+            console.error('Error creating course:', err);
+            this.courseFormError = 'Failed to create course.';
+          }
+        });
+    }
+  }
+
+  deleteCourse(id: number): void {
     const confirmed = confirm('Are you sure you want to delete this course?');
     if (!confirmed) return;
 
@@ -179,11 +435,11 @@ export class AdminDashboardComponent implements OnInit {
       .subscribe({
         next: () => {
           this.loadCourses();
-          alert('Course deleted successfully ');
+          alert('Course deleted successfully');
         },
         error: (err) => {
           console.error('Error deleting course:', err);
-          alert('Failed to delete course ');
+          alert('Failed to delete course');
         }
       });
   }

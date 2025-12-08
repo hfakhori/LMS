@@ -3,14 +3,15 @@ import { DashboardComponent } from './student/dashboard/dashboard';
 import { MyCoursesComponent } from './student/my-courses/my-courses';
 import { TeacherDashboardComponent } from './teacher/dashboard/dashboard';
 import { AdminDashboardComponent } from './admin/dashboard/dashboard';
+import { studentGuard, teacherGuard, adminGuard } from './auth.guard';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'student', pathMatch: 'full' },
+  // { path: '', redirectTo: 'student', pathMatch: 'full' },
 
-  { path: 'student', component: DashboardComponent },
-  { path: 'student/my-courses', component: MyCoursesComponent },
+  { path: 'student', component: DashboardComponent,canActivate: [studentGuard]  },
+  { path: 'student/my-courses', component: MyCoursesComponent,canActivate: [studentGuard]  },
 
-  { path: 'teacher', component: TeacherDashboardComponent },
+  { path: 'teacher', component: TeacherDashboardComponent,canActivate: [teacherGuard] },
 
-  { path: 'admin', component: AdminDashboardComponent }
+  { path: 'admin', component: AdminDashboardComponent,canActivate: [adminGuard] }
 ];

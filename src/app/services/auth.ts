@@ -7,31 +7,19 @@ import { environment } from '../environments/environments';
 })
 export class Auth {
 
-  private baseUrl = environment.apiUrl;   
+  private baseUrl = environment.apiUrl;
+
   constructor(private http: HttpClient) {}
 
-  
-  loginStudent(data: { email: string; password: string }) {
+  // ✅ واحد موحّد للجميع: Student / Teacher / Admin
+  login(data: { email: string; password: string }) {
     return this.http.post<{ token: string }>(
-      `${this.baseUrl}/Student/login`,
+      `${this.baseUrl}/User/login`,
       data
     );
   }
 
-  loginTeacher(data: { email: string; password: string }) {
-    return this.http.post<{ token: string }>(
-      `${this.baseUrl}/Teacher/login`,
-      data
-    );
-  }
-
-  loginAdmin(data: { email: string; password: string }) {
-    return this.http.post<{ token: string }>(
-      `${this.baseUrl}/Admin/login`,
-      data
-    );
-  }
-
+  // === Token helpers ===
 
   saveToken(token: string) {
     localStorage.setItem('token', token);
@@ -74,7 +62,8 @@ export class Auth {
       payload.nameId ??
       payload.sub ??
       payload.id ??
-      payload.Id;
+      payload.Id ??
+      payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"];
 
     if (!id) return null;
 
@@ -82,7 +71,6 @@ export class Auth {
     return isNaN(num) ? null : num;
   }
 
- 
   getUserRole(): string | null {
     const payload = this.decodeToken();
     if (!payload) return null;
@@ -93,16 +81,16 @@ export class Auth {
       null
     );
   }
+
   getUserName(): string | null {
-  const payload = this.decodeToken();
-  if (!payload) return null;
+    const payload = this.decodeToken();
+    if (!payload) return null;
 
-  const nameClaim = 
-    payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"] ||
-    payload.name ||
-    null;
+    const nameClaim =
+      payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'] ||
+      payload.name ||
+      null;
 
-  return nameClaim;
-}
-
+    return nameClaim;
+  }
 }

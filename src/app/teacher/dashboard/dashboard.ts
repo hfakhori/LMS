@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environments';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { Auth } from '../../services/auth';
 
 @Component({
   selector: 'app-teacher-dashboard',
@@ -16,7 +17,6 @@ export class TeacherDashboardComponent implements OnInit {
   private baseUrl = environment.apiUrl;
 
   teacherId: number = 0;
-  couter: number = 0;
 
   courses: any[] = [];
   errorMessage: string = '';
@@ -29,20 +29,20 @@ export class TeacherDashboardComponent implements OnInit {
   selectedCourseId: number | null = null;
   selectedCourseStudents: any[] = [];
 
-  constructor(private http: HttpClient,private cdr:ChangeDetectorRef) { }
+  constructor(
+    private http: HttpClient,
+    private auth: Auth,
+    private cdr: ChangeDetectorRef
+  ) { }
 
   ngOnInit(): void {
-    console.log('TeacherDashboardComponent init');
-
-    const token = localStorage.getItem('token');
-    if (token) {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      this.teacherId =
-        payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier']
-        || payload['id'];
-      console.log('Teacher ID from token =', this.teacherId);
+    const id = this.auth.getUserId();
+    if (!id) {
+      this.errorMessage = 'Teacher ID not found in token.';
+      return;
     }
 
+    this.teacherId = id;
     this.loadCourses();
   }
 
@@ -60,10 +60,10 @@ export class TeacherDashboardComponent implements OnInit {
       }
     }).subscribe({
       next: (res) => {
-        this.courses = res.items;
-        this.totalItems = res.totalItems;
-        this.pageNumber = res.pageNumber;
-        this.pageSize = res.pageSize;
+        this.courses = res.items || [];
+        this.totalItems = res.totalItems ?? 0;
+        this.pageNumber = res.pageNumber ?? this.pageNumber;
+        this.pageSize = res.pageSize ?? this.pageSize;
         this.cdr.detectChanges();
       },
       error: (err) => {
@@ -80,9 +80,6 @@ export class TeacherDashboardComponent implements OnInit {
   }
 
   viewStudents(courseId: number) {
-
-    console.log('Students button clicked, courseId =', courseId);
-
     this.selectedCourseId = courseId;
     this.selectedCourseStudents = [];
 
@@ -90,13 +87,9 @@ export class TeacherDashboardComponent implements OnInit {
       .subscribe({
         next: (students) => {
           this.showStudentsModal = true;
-
-          console.log('API students response =', students);
-          this.selectedCourseStudents = students;
+          this.selectedCourseStudents = students || [];
           this.cdr.detectChanges();
         },
-        
-        
         error: (err) => {
           console.error('Error loading students for course', err);
           this.selectedCourseStudents = [];
@@ -105,7 +98,6 @@ export class TeacherDashboardComponent implements OnInit {
   }
 
   closeStudentsModal() {
-    console.log('Closing modal');
     this.showStudentsModal = false;
     this.selectedCourseStudents = [];
   }
@@ -117,13 +109,12 @@ export class TeacherDashboardComponent implements OnInit {
       .subscribe({
         next: () => {
           this.loadCourses();
-          alert('Course deleted ');
+          alert('Course deleted');
         },
         error: (err) => {
           console.error('Delete course error', err);
-          alert('Failed to delete course ');
+          alert('Failed to delete course');
         }
       });
   }
-
 }

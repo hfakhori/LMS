@@ -1,9 +1,10 @@
-
 <h2 style="margin: 20px 0; text-align: center;">
   Admin Dashboard
 </h2>
 
 <div style="margin: 20px;">
+
+  <!-- ============ Students ============ -->
 
   <h3>Students Management</h3>
 
@@ -16,6 +17,44 @@
     Refresh Students
   </button>
 
+  <button (click)="openCreateStudent()"
+          style="margin-left: 8px; margin-bottom: 10px; padding: 4px 10px;">
+    + Add Student
+  </button>
+
+  <div *ngIf="isStudentFormVisible"
+       style="margin-bottom: 15px; padding: 10px; border: 1px solid #ccc; border-radius: 6px; max-width: 400px;">
+    <h4 style="margin-top: 0;">
+      {{ isEditingStudent ? 'Edit Student' : 'Create Student' }}
+    </h4>
+
+    <div style="margin-bottom: 8px;">
+      <label>Full Name:</label><br />
+      <input [(ngModel)]="studentForm.fullName"
+             type="text"
+             style="width: 100%; padding: 4px;" />
+    </div>
+
+    <div style="margin-bottom: 8px;">
+      <label>Email:</label><br />
+      <input [(ngModel)]="studentForm.email"
+             type="email"
+             style="width: 100%; padding: 4px;" />
+    </div>
+
+    <p *ngIf="studentFormError" style="color: red; margin-top: 4px;">
+      {{ studentFormError }}
+    </p>
+
+    <button (click)="submitStudentForm()" style="padding: 4px 10px;">
+      {{ isEditingStudent ? 'Update' : 'Create' }}
+    </button>
+    <button (click)="cancelStudentForm()"
+            style="padding: 4px 10px; margin-left: 6px;">
+      Cancel
+    </button>
+  </div>
+
   <table border="1" cellspacing="0" cellpadding="6"
          style="width: 100%; border-collapse: collapse; margin-bottom: 10px;">
     <thead style="background-color: #f0f0f0;">
@@ -23,7 +62,7 @@
         <th>ID</th>
         <th>Full Name</th>
         <th>Email</th>
-        <th style="width: 120px;">Actions</th>
+        <th style="width: 160px;">Actions</th>
       </tr>
     </thead>
     <tbody>
@@ -32,7 +71,12 @@
         <td>{{ s.fullName }}</td>
         <td>{{ s.email }}</td>
         <td>
-          <button (click)="deleteStudent(s.id)">Delete</button>
+          <button (click)="openEditStudent(s)" style="margin-right: 6px;">
+            Edit
+          </button>
+          <button (click)="deleteStudent(s.id)">
+            Delete
+          </button>
         </td>
       </tr>
 
@@ -52,7 +96,9 @@
     showFirstLastButtons>
   </mat-paginator>
 
-  <hr style="margin: 30px 0;">
+  <hr style="margin: 30px 0;" />
+
+  <!-- ============ Teachers ============ -->
 
   <h3>Teachers Management</h3>
 
@@ -65,6 +111,44 @@
     Refresh Teachers
   </button>
 
+  <button (click)="openCreateTeacher()"
+          style="margin-left: 8px; margin-bottom: 10px; padding: 4px 10px;">
+    + Add Teacher
+  </button>
+
+  <div *ngIf="isTeacherFormVisible"
+       style="margin-bottom: 15px; padding: 10px; border: 1px solid #ccc; border-radius: 6px; max-width: 400px;">
+    <h4 style="margin-top: 0;">
+      {{ isEditingTeacher ? 'Edit Teacher' : 'Create Teacher' }}
+    </h4>
+
+    <div style="margin-bottom: 8px;">
+      <label>Full Name:</label><br />
+      <input [(ngModel)]="teacherForm.fullName"
+             type="text"
+             style="width: 100%; padding: 4px;" />
+    </div>
+
+    <div style="margin-bottom: 8px;">
+      <label>Email:</label><br />
+      <input [(ngModel)]="teacherForm.email"
+             type="email"
+             style="width: 100%; padding: 4px;" />
+    </div>
+
+    <p *ngIf="teacherFormError" style="color: red; margin-top: 4px;">
+      {{ teacherFormError }}
+    </p>
+
+    <button (click)="submitTeacherForm()" style="padding: 4px 10px;">
+      {{ isEditingTeacher ? 'Update' : 'Create' }}
+    </button>
+    <button (click)="cancelTeacherForm()"
+            style="padding: 4px 10px; margin-left: 6px;">
+      Cancel
+    </button>
+  </div>
+
   <table border="1" cellspacing="0" cellpadding="6"
          style="width: 100%; border-collapse: collapse; margin-bottom: 10px;">
     <thead style="background-color: #f0f0f0;">
@@ -72,7 +156,7 @@
         <th>ID</th>
         <th>Full Name</th>
         <th>Email</th>
-        <th style="width: 120px;">Actions</th>
+        <th style="width: 160px;">Actions</th>
       </tr>
     </thead>
     <tbody>
@@ -81,6 +165,9 @@
         <td>{{ t.fullName }}</td>
         <td>{{ t.email }}</td>
         <td>
+          <button (click)="openEditTeacher(t)" style="margin-right: 6px;">
+            Edit
+          </button>
           <button (click)="deleteTeacher(t.id)">Delete</button>
         </td>
       </tr>
@@ -101,7 +188,9 @@
     showFirstLastButtons>
   </mat-paginator>
 
-  <hr style="margin: 30px 0;">
+  <hr style="margin: 30px 0;" />
+
+  <!-- ============ Courses ============ -->
 
   <h3>Courses Management</h3>
 
@@ -114,6 +203,56 @@
     Refresh Courses
   </button>
 
+  <button (click)="openCreateCourse()"
+          style="margin-left: 8px; margin-bottom: 10px; padding: 4px 10px;">
+    + Add Course
+  </button>
+
+  <!-- Course Modal/Form -->
+  <div *ngIf="isCourseFormVisible"
+       style="margin-bottom: 15px; padding: 10px; border: 1px solid #ccc; border-radius: 6px; max-width: 450px;">
+    <h4 style="margin-top: 0;">
+      {{ isEditingCourse ? 'Edit Course' : 'Create Course' }}
+    </h4>
+
+    <div style="margin-bottom: 8px;">
+      <label>Title:</label><br />
+      <input [(ngModel)]="courseForm.title"
+             type="text"
+             style="width: 100%; padding: 4px;" />
+    </div>
+
+    <div style="margin-bottom: 8px;">
+      <label>Description:</label><br />
+      <textarea [(ngModel)]="courseForm.description"
+                rows="3"
+                style="width: 100%; padding: 4px;"></textarea>
+    </div>
+
+    <div style="margin-bottom: 8px;">
+      <label>Teacher:</label><br />
+      <select [(ngModel)]="courseForm.teacherId"
+              style="width: 100%; padding: 4px;">
+        <option [ngValue]="null">-- Select Teacher --</option>
+        <option *ngFor="let t of teachers" [ngValue]="t.id">
+          (ID: {{ t.id }}) {{ t.fullName }} - {{ t.email }}
+        </option>
+      </select>
+    </div>
+
+    <p *ngIf="courseFormError" style="color: red; margin-top: 4px;">
+      {{ courseFormError }}
+    </p>
+
+    <button (click)="submitCourseForm()" style="padding: 4px 10px;">
+      {{ isEditingCourse ? 'Update' : 'Create' }}
+    </button>
+    <button (click)="cancelCourseForm()"
+            style="padding: 4px 10px; margin-left: 6px;">
+      Cancel
+    </button>
+  </div>
+
   <table border="1" cellspacing="0" cellpadding="6"
          style="width: 100%; border-collapse: collapse; margin-bottom: 10px;">
     <thead style="background-color: #f0f0f0;">
@@ -122,7 +261,7 @@
         <th>Title</th>
         <th>Description</th>
         <th>Teacher ID</th>
-        <th style="width: 120px;">Actions</th>
+        <th style="width: 160px;">Actions</th>
       </tr>
     </thead>
     <tbody>
@@ -132,6 +271,9 @@
         <td>{{ c.description }}</td>
         <td>{{ c.teacherId }}</td>
         <td>
+          <button (click)="openEditCourse(c)" style="margin-right: 6px;">
+            Edit
+          </button>
           <button (click)="deleteCourse(c.id)">Delete</button>
         </td>
       </tr>
@@ -153,4 +295,3 @@
   </mat-paginator>
 
 </div>
-

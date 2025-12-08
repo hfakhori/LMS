@@ -5,6 +5,27 @@ import { environment } from '../../environments/environments';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { Auth } from '../../services/auth';
 
+interface Course {
+  id: number;
+  title: string;
+  description: string;
+  teacherId: number;
+}
+
+interface PaginatedResponse<T> {
+  items: T[];
+  totalItems: number;
+  pageNumber: number;
+  pageSize: number;
+  totalPages?: number;
+}
+
+interface Enrollment {
+  id: number;
+  studentId: number;
+  courseId: number;
+}
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
@@ -14,13 +35,18 @@ import { Auth } from '../../services/auth';
 })
 export class DashboardComponent implements OnInit {
 
-  courses: any[] = [];
-  errorMessage: string = '';
+  courses: Course[] = [];
+  errorMessage = '';
 
-  pageNumber: number = 1;
-  pageSize: number = 5;
-  totalItems: number = 0;
-  totalPages: number = 0;
+  pageNumber = 1;
+  pageSize = 5;
+  totalItems = 0;
+  totalPages = 0;
+
+  // ✔ الكورسات المسجّل فيها الطالب
+  private enrolledCourseIds = new Set<number>();
+
+  loading = false;
 
   private baseUrl = environment.apiUrl;
 
@@ -31,35 +57,83 @@ export class DashboardComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    this.loadStudentData();
+  }
+
+  private loadStudentData(): void {
+    const studentId = this.auth.getUserId();
+
+    if (!studentId) {
+      this.errorMessage = 'Student ID not found in token.';
+      return;
+    }
+
+    // نجيب الكورسات + التسجيلات
+    this.loadEnrollments(studentId);
     this.loadCourses();
   }
 
-  loadCourses() {
-    this.http.get(`${this.baseUrl}/Course?pageNumber=${this.pageNumber}&pageSize=${this.pageSize}`)
+  private loadEnrollments(studentId: number): void {
+    // نستخدم نفس /Enrollment اللي تستعمله MyCourses
+    this.http.get<Enrollment[]>(`${this.baseUrl}/Enrollment`)
       .subscribe({
-        next: (res: any) => {
-          this.courses = res.items || [];
-          this.totalItems = res.totalItems;
-          this.totalPages = res.totalPages;
+        next: (enrollments) => {
+          const myEnrollments = enrollments.filter(e => e.studentId === studentId);
+          this.enrolledCourseIds = new Set(myEnrollments.map(e => e.courseId));
           this.cdr.detectChanges();
         },
-        error: () => {
-          this.errorMessage = "Error loading courses.";
+        error: (err) => {
+          console.error('Error loading enrollments:', err);
+          // مش ضروري نوقف الداشبورد، بس مش رح نقدر نمنع الـ double-enroll
         }
       });
   }
 
-  onPageChange(event: PageEvent) {
-    this.pageNumber = event.pageIndex + 1; 
+  loadCourses(): void {
+    this.loading = true;
+    this.errorMessage = '';
+
+    this.http
+      .get<PaginatedResponse<Course>>(
+        `${this.baseUrl}/Course?pageNumber=${this.pageNumber}&pageSize=${this.pageSize}`
+      )
+      .subscribe({
+        next: (res) => {
+          this.courses = res.items || [];
+          this.totalItems = res.totalItems;
+          this.totalPages = (res as any).totalPages ?? 0;
+          this.loading = false;
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error('Error loading courses:', err);
+          this.errorMessage = 'Error loading courses.';
+          this.loading = false;
+        }
+      });
+  }
+
+  onPageChange(event: PageEvent): void {
+    this.pageNumber = event.pageIndex + 1;
     this.pageSize = event.pageSize;
     this.loadCourses();
   }
 
+  // هل الطالب مسجّل في هذا الكورس؟
+  isCourseEnrolled(courseId: number): boolean {
+    return this.enrolledCourseIds.has(courseId);
+  }
+
   enroll(courseId: number): void {
-    const studentId = this.auth.getUserId(); 
+    const studentId = this.auth.getUserId();
 
     if (!studentId) {
-      alert('Student ID not found in token ');
+      alert('Student ID not found in token.');
+      return;
+    }
+
+    if (this.isCourseEnrolled(courseId)) {
+      alert('You are already enrolled in this course.');
       return;
     }
 
@@ -67,10 +141,14 @@ export class DashboardComponent implements OnInit {
       studentId: studentId,
       courseId: courseId
     }).subscribe({
-      next: () => alert('Enrolled successfully '),
+      next: () => {
+        alert('Enrolled successfully ✔');
+        this.enrolledCourseIds.add(courseId);
+        this.cdr.detectChanges();
+      },
       error: (err: any) => {
         console.error('Enroll error:', err);
-        alert('Failed to enroll ');
+        alert('Failed to enroll.');
       }
     });
   }

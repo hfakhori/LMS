@@ -43,7 +43,6 @@ export class DashboardComponent implements OnInit {
   totalItems = 0;
   totalPages = 0;
 
-  // ✔ الكورسات المسجّل فيها الطالب
   private enrolledCourseIds = new Set<number>();
 
   loading = false;
@@ -74,7 +73,6 @@ export class DashboardComponent implements OnInit {
   }
 
   private loadEnrollments(studentId: number): void {
-    // نستخدم نفس /Enrollment اللي تستعمله MyCourses
     this.http.get<Enrollment[]>(`${this.baseUrl}/Enrollment`)
       .subscribe({
         next: (enrollments) => {
@@ -84,7 +82,6 @@ export class DashboardComponent implements OnInit {
         },
         error: (err) => {
           console.error('Error loading enrollments:', err);
-          // مش ضروري نوقف الداشبورد، بس مش رح نقدر نمنع الـ double-enroll
         }
       });
   }
@@ -119,7 +116,6 @@ export class DashboardComponent implements OnInit {
     this.loadCourses();
   }
 
-  // هل الطالب مسجّل في هذا الكورس؟
   isCourseEnrolled(courseId: number): boolean {
     return this.enrolledCourseIds.has(courseId);
   }
@@ -148,8 +144,10 @@ export class DashboardComponent implements OnInit {
       },
       error: (err: any) => {
         console.error('Enroll error:', err);
-        alert('Failed to enroll.');
+        const msg = err.error || 'Failed to enroll.';
+        alert(msg);
       }
+
     });
   }
 }

@@ -11,7 +11,6 @@ export class Auth {
 
   constructor(private http: HttpClient) {}
 
-  // ✅ واحد موحّد للجميع: Student / Teacher / Admin
   login(data: { email: string; password: string }) {
     return this.http.post<{ token: string }>(
       `${this.baseUrl}/User/login`,
@@ -19,7 +18,6 @@ export class Auth {
     );
   }
 
-  // === Token helpers ===
 
   saveToken(token: string) {
     localStorage.setItem('token', token);

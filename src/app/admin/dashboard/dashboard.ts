@@ -92,7 +92,7 @@ export class AdminDashboardComponent implements OnInit {
     teacherId: null
   };
 
-  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
+  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) { }
 
   ngOnInit(): void {
     this.loadStudents();
@@ -181,13 +181,20 @@ export class AdminDashboardComponent implements OnInit {
           }
         });
     } else {
-      this.http.post(`${this.baseUrl}/Student`, payload)
+      this.http.post<any>(`${this.baseUrl}/Student`, payload)
         .subscribe({
-          next: () => {
+          next: (res) => {
+            console.log("Student create response:", res);
+
             this.isStudentFormVisible = false;
             this.studentsPageNumber = 1;
             this.loadStudents();
-            alert('Student created successfully ✔');
+
+            alert(
+              `Student created successfully ✔\n\n` +
+              `Email: ${res.email}\n` +
+              `Default Password: ${res.defaultPassword}`
+            );
           },
           error: (err) => {
             console.error('Error creating student:', err);
@@ -295,13 +302,20 @@ export class AdminDashboardComponent implements OnInit {
           }
         });
     } else {
-      this.http.post(`${this.baseUrl}/Teacher`, payload)
+      this.http.post<any>(`${this.baseUrl}/Teacher`, payload)
         .subscribe({
-          next: () => {
+          next: (res) => {
+            console.log("Teacher create response:", res);
+
             this.isTeacherFormVisible = false;
             this.teachersPageNumber = 1;
             this.loadTeachers();
-            alert('Teacher created successfully ✔');
+
+            alert(
+              `Teacher created successfully ✔\n\n` +
+              `Email: ${res.email}\n` +
+              `Default Password: ${res.defaultPassword}`
+            );
           },
           error: (err) => {
             console.error('Error creating teacher:', err);

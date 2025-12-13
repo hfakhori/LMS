@@ -67,7 +67,6 @@ export class DashboardComponent implements OnInit {
       return;
     }
 
-    // نجيب الكورسات + التسجيلات
     this.loadEnrollments(studentId);
     this.loadCourses();
   }
